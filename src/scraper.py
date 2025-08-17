@@ -13,8 +13,8 @@ async def scrape_link(url: str):
   options.add_argument('--start-maximized')
   options.add_argument('--disable-notifications')
   options.add_argument('--user-agent=new_useragent')
-  #options.add_argument("--no-sandbox")
-  options.binary_location = '/nix/store/ixvs3iggafi1pic1vmgfy2hxn95d3qpa-google-chrome-139.0.7258.66/bin/google-chrome-stable'
+  options.add_argument("--no-sandbox")
+
   async with Chrome(options=options) as browser:
 
     tab = await browser.start()
