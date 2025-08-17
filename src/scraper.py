@@ -1,11 +1,8 @@
 from pydoll.browser import Chrome
 from pydoll.browser.options import ChromiumOptions
 import validators
-import requests
 from urllib.parse import urlparse
 import os
-
-supported_urls = ["www.autotrader.co.uk", "www.carandclassic.com"]
 
 async def scrape_link(url: str):
   options = ChromiumOptions()
