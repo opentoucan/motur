@@ -1,0 +1,9 @@
+enabled_sites:
+  - www.autotrader.co.uk
+  - www.carandclassic.com
+  - www.pistonheads.com
+  - www.facebook.com
+  - www.gumtree.com
+scraper:
+  chrome_binary_location: /usr/bin/google-chrome
+  enable_sandbox: True
