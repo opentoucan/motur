@@ -39,7 +39,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/memer
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ steps.semver_tag.outputs.TAG }}
+            type=semver,pattern={{version}},value=${{ steps.semver_tag.outputs.TAG }}
 
       - name: Build and push Docker image
         id: build-and-push
