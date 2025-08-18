@@ -1,6 +1,6 @@
 import fast_alpr
 from typing import Optional
-from fast_alpr import ALPRResult, OcrResult
+from fast_alpr import OcrResult
 
 def find_registration_plate(file_name: str) -> Optional[str]:
   alpr = fast_alpr.ALPR(
