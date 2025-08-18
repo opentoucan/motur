@@ -1,9 +1,9 @@
-from fastapi import FastAPI
 import mot_service
 import scraper
-import anpr_service
-import os
-import glob
+from fastapi import FastAPI
+from fastapi.exceptions import HTTPException
+from urllib.parse import urlparse
+from config import settings
 
 app = FastAPI()
 
@@ -13,10 +13,11 @@ def read_mot_from_reg(reg: str):
 
 @app.get("/link")
 async def read_mot_from_webpage(url: str):
-  image_url_list = await scraper.scrape_link(url)
-  registration_plate = anpr_service.find_registration_plate(image_url_list)
-  for filename in glob.glob("*.png"):
-    os.remove(filename)
+  domain = urlparse(url).netloc
+  if domain not in settings.enabled_sites:
+    raise HTTPException(status_code=400, detail=f"Website {domain} is not enabled")
+
+  registration_plate = await scraper.scrape_link(url)
   if registration_plate is not None:
     mot_history = mot_service.fetch_history(registration_plate)
     return mot_history

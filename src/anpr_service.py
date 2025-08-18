@@ -1,16 +1,21 @@
 import fast_alpr
-import os
-import glob
+from typing import Optional
+from fast_alpr import ALPRResult, OcrResult
 
-def find_registration_plate(image_list: list[str]):
+def find_registration_plate(file_name: str) -> Optional[str]:
   alpr = fast_alpr.ALPR(
       detector_model="yolo-v9-t-384-license-plate-end2end",
       ocr_model="cct-xs-v1-global-model",
   )
 
-  for image_name in image_list:
-    prediction_result = alpr.predict(image_name)
-    prediction = sorted(prediction_result, key=lambda x: x.ocr.confidence)[0] if prediction_result else None
-    if prediction is not None and prediction.ocr.confidence > 0.95:
-      return prediction.ocr.text
+  prediction_result = alpr.predict(file_name)
+
+  for alprresult in prediction_result:
+    if alprresult.ocr is None:
+      break
+    ocr_result: OcrResult = alprresult.ocr
+    if type(ocr_result.confidence) is not float:
+      break
+    if ocr_result.confidence > 0.95:
+      return ocr_result.text
   return None
