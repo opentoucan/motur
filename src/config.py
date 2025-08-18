@@ -9,7 +9,8 @@ class MotSettings(BaseSettings):
 
 class ScraperSettings(BaseModel):
     chrome_binary_location: str
-    enable_sandbox: bool
+    disable_sandbox: bool
+    image_path: str
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(yaml_file="config.yaml")

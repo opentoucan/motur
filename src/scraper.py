@@ -16,7 +16,7 @@ async def scrape_link(url: str) -> Optional[str]:
   options.add_argument('--user-agent=new_useragent')
   options.add_argument('--disable-dev-shm-usage') # Overcome limited resource issues
 
-  if not settings.scraper.enable_sandbox:
+  if settings.scraper.disable_sandbox:
     options.add_argument("--no-sandbox")
   options.binary_location = settings.scraper.chrome_binary_location
 
@@ -33,12 +33,12 @@ async def scrape_link(url: str) -> Optional[str]:
       if image_src is not None and validators.url(image_src):
         img_tab = await browser.new_tab(image_src)
         image_name = os.path.basename(urlparse(image_src).path)
-        await img_tab.take_screenshot(f"{image_name}.png")
-        registration_plate = anpr_service.find_registration_plate(f"{image_name}.png")
+        await img_tab.take_screenshot(f"{settings.scraper.image_path}/{image_name}.png")
+        registration_plate = anpr_service.find_registration_plate(f"{settings.scraper.image_path}/{image_name}.png")
         if registration_plate is not None:
           break
 
-    for filename in glob.glob("*.png"):
+    for filename in glob.glob(f"{settings.scraper.image_path}/*.png"):
       os.remove(filename)
 
     await browser.stop()
