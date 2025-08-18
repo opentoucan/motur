@@ -28,9 +28,6 @@
             pkgs.stdenv.cc.cc
             pkgs.libGL
             pkgs.glib
-            #pkgs.lib
-            # Add any missing library needed
-            # You can use the nix-index package to locate them, e.g. nix-locate -w --top-level --at-root /lib/libudev.so.1
           ];
           packages = builtins.attrValues {
             inherit
@@ -43,7 +40,7 @@
               google-chrome
               gcc
               glibc
-                    zlib
+              zlib
               ;
           };
         };
