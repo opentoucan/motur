@@ -1,0 +1,67 @@
+name: ci
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'main' ]
+    paths-ignore:
+      - '.github/**'
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: [ 'main' ]
+    paths-ignore:
+      - '.github/**'
+      - 'docs/**'
+      - '**.md'
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version-file: "pyproject.toml"
+      - name: Install deps
+        run: uv sync
+      - name: lint
+        run: uvx ruff@latest check
+      - name: static typing check
+        run: uvx pyright@latest
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: "Set up Python"
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version-file: "pyproject.toml"
+      - name: Install deps
+        run: uv sync
+      - name: tests
+        run: uv run pytest
+
+  image-build:
+    name: check image build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          push: false

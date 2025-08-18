@@ -1,0 +1,21 @@
+---
+# Renovate Types
+- name: renovate/container
+  color: "027fa0"
+- name: renovate/github-action
+  color: "0e8a16"
+- name: renovate/github-release
+  color: "0e8a16"
+- name: renovate/pypi
+  color: "0efa10"
+- name: renovate/python-version
+  color: "003300"
+# Semantic Types
+- name: type/digest
+  color: "ffeC19"
+- name: type/patch
+  color: "ffeC19"
+- name: type/minor
+  color: "ff9800"
+- name: type/major
+  color: "f6412d"
