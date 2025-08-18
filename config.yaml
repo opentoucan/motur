@@ -5,5 +5,6 @@ enabled_sites:
   - www.facebook.com
   - www.gumtree.com
 scraper:
-  chrome_binary_location: /usr/bin/google-chrome
-  enable_sandbox: True
+  chrome_binary_location: /usr/bin/chromium
+  disable_sandbox: True
+  image_path: /tmp
