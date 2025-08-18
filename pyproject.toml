@@ -3,7 +3,7 @@ name = "motur"
 version = "0.1.0"
 description = "A fastapi project to fetch vehicle information and MOT history using ANPR on images if required"
 readme = "README.md"
-requires-python = "==3.13"
+requires-python = "==3.13.*"
 dependencies = [
   "fast-alpr[onnx]==0.2.0",
   "fastapi[standard]==0.116.1",
