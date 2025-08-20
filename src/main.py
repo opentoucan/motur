@@ -7,11 +7,11 @@ from config import settings
 
 app = FastAPI()
 
-@app.get("/reg")
+@app.get("/reg/{reg}")
 def read_mot_from_reg(reg: str):
     return mot_service.fetch_history(reg)
 
-@app.get("/link")
+@app.get("/link/{url}")
 async def read_mot_from_webpage(url: str):
   domain = urlparse(url).netloc
   if domain not in settings.enabled_sites:
