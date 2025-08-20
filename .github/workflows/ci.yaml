@@ -51,7 +51,7 @@ jobs:
       - name: Install deps
         run: uv sync
       - name: tests
-        run: uvx pytest@latest
+        run: uvx pytest@latest ./tests
 
   image-build:
     name: check image build
