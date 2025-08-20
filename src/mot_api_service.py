@@ -63,7 +63,10 @@ async def MapToMotSummaryInformation(vehicle_mot_response: ErrorResponse | NewRe
               mot_test_defects: list[MotTestDefect] = []
               if (type (mot_test_response) is DVSAMotTest or type(mot_test_response) is CVSMotTest) and type(mot_test_response.defects) is list[Defect]:
                   for defect in mot_test_response.defects:
-                      mot_test_defects.append(MotTestDefect(text=defect.text, type=defect.type_, dangerous=defect.dangerous)) # type: ignore
+                      mot_test_defects.append(MotTestDefect(
+                          text=defect.text if type(defect.text) is str else None,
+                          type=defect.type_ if type(defect.type_) is str else None,
+                          dangerous=defect.dangerous if type(defect.dangerous) is bool else None))
               mot_test = MotTest(
                   completed_date=mot_test_response.completed_date,
                   test_result=mot_test_response.test_result,
@@ -96,7 +99,7 @@ async def fetch_mot_history(reg: str) -> MotSummaryInformation | MotErrorRespons
     msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
     result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])
     if type(result) is not dict:
-        return MotErrorResponse(error_message="Unable to authenticate with the MOT API") # type: ignore
+        return MotErrorResponse(error_message="Unable to authenticate with the MOT API")
     headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
     mot_client = MotClient(base_url="https://history.mot.api.gov.uk", headers=headers)
     async with mot_client:
