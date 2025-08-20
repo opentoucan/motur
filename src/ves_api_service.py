@@ -7,7 +7,6 @@ from generated.ves_client.models.vehicle import Vehicle
 from generated.ves_client.models.vehicle_mot_status import VehicleMotStatus
 from generated.ves_client.models.vehicle_request import VehicleRequest
 from generated.ves_client.models.error_response import ErrorResponse
-from generated.ves_client.models.errors import Errors
 from generated.ves_client.models.vehicle_tax_status import VehicleTaxStatus
 
 class VehicleInformation(BaseModel):

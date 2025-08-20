@@ -10,8 +10,6 @@ from generated.mot_client.models.cvs_mot_test import CVSMotTest
 from generated.mot_client.models.defect import Defect
 from generated.mot_client.models.dvsa_mot_test import DVSAMotTest
 from generated.mot_client.models.error_response import ErrorResponse
-from generated.mot_client.models.new_reg_vehicle_response import NewRegVehicleResponse
-from generated.mot_client.models.vehicle_with_mot_response import VehicleWithMotResponse
 from generated.mot_client.types import Unset
 
 class MotTestDefect(BaseModel):
