@@ -1,4 +1,4 @@
-import mot_service
+import vehicle_service
 import scraper
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
@@ -8,8 +8,8 @@ from config import settings
 app = FastAPI()
 
 @app.get("/reg/{reg}")
-def read_mot_from_reg(reg: str):
-    return mot_service.fetch_history(reg)
+async def read_mot_from_reg(reg: str):
+    return await vehicle_service.fetch_vehicle_information(reg)
 
 @app.get("/link/{url}")
 async def read_mot_from_webpage(url: str):
@@ -19,6 +19,6 @@ async def read_mot_from_webpage(url: str):
 
   registration_plate = await scraper.scrape_link(url)
   if registration_plate is not None:
-    mot_history = mot_service.fetch_history(registration_plate)
-    return mot_history
+    return await vehicle_service.fetch_vehicle_information(registration_plate)
+
   return "Could not find registration details"

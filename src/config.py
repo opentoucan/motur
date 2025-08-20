@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
 
-class MotSettings(BaseSettings):
+class VehicleSettings(BaseSettings):
   mot_client_id: str
   mot_tenant_id: str
   mot_client_secret: str
   mot_api_key: str
+  ves_api_key: str
 
 class ScraperSettings(BaseModel):
     chrome_binary_location: str
@@ -30,4 +31,4 @@ class Settings(BaseSettings):
         return (YamlConfigSettingsSource(settings_cls), )
 
 settings = Settings() # type: ignore
-mot_settings = MotSettings() # type: ignore
+vehicle_settings = VehicleSettings() # type: ignore

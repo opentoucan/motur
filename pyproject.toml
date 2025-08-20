@@ -5,12 +5,14 @@ description = "A fastapi project to fetch vehicle information and MOT history us
 readme = "README.md"
 requires-python = "==3.13.*"
 dependencies = [
+  "datetime>=5.5",
   "fast-alpr[onnx]==0.2.0",
   "fastapi[standard]==0.116.1",
   "msal==1.33.0",
   "pydantic==2.11.7",
   "pydantic-settings==2.10.1",
   "pydoll-python==2.6.0",
+  "python-dateutil>=2.9.0.post0",
   "requests==2.32.5",
   "validators>=0.35.0",
 ]
