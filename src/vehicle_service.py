@@ -1,5 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
-from pydantic.alias_generators import to_camel
+from pydantic import BaseModel
 from mot_api_service import MotErrorResponse, MotSummaryInformation
 from ves_api_service import VehicleInformation, VehicleErrorResponse
 import mot_api_service

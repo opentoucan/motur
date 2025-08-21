@@ -1,9 +1,6 @@
-from typing import Annotated, Any
 from config import vehicle_settings
 from datetime import date
-from pydantic import AliasGenerator, BaseModel, BeforeValidator, ConfigDict, Field
-from pydantic.alias_generators import to_camel
-from generated.ves_client.types import Unset
+from pydantic import BaseModel, Field
 from generated.ves_client import Client as VesClient
 from generated.ves_client.api.vehicle import get_vehicle_details_by_registration_number
 from generated.ves_client.models.vehicle import Vehicle
