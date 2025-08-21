@@ -39,13 +39,16 @@ class MotSummaryInformation(BaseModel):
 class MotErrorResponse(BaseModel):
     error_message: str
 
-async def MapToMotSummaryInformation(vehicle_mot_response: ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None) -> MotSummaryInformation | MotErrorResponse | None:
+MotApiResponseType = ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None
+MotInformationResponseType = MotSummaryInformation | MotErrorResponse | None
+
+async def MapToMotSummaryInformation(vehicle_mot_response: MotApiResponseType) -> MotInformationResponseType:
         if type(vehicle_mot_response) is ErrorResponse:
             return MotErrorResponse(error_message=vehicle_mot_response.error_message if type(vehicle_mot_response.error_message) is str else "")
         elif vehicle_mot_response is not None:
             return MotSummaryInformation.model_validate(vehicle_mot_response.to_dict())
 
-async def fetch_mot_history(reg: str) -> MotSummaryInformation | MotErrorResponse | None:
+async def fetch_mot_history(reg: str) -> MotInformationResponseType:
     client_id = vehicle_settings.mot_client_id
     tenant_id = vehicle_settings.mot_tenant_id
     client_secret = vehicle_settings.mot_client_secret
@@ -58,5 +61,5 @@ async def fetch_mot_history(reg: str) -> MotSummaryInformation | MotErrorRespons
     headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
     mot_client = MotClient(base_url="https://history.mot.api.gov.uk", headers=headers)
     async with mot_client:
-        vehicle_mot_response: ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None = await get_v1_trade_vehicles_registration_registration.asyncio(client=mot_client, registration=reg)
+        vehicle_mot_response: MotApiResponseType = await get_v1_trade_vehicles_registration_registration.asyncio(client=mot_client, registration=reg)
         return await MapToMotSummaryInformation(vehicle_mot_response)
