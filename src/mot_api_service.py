@@ -37,14 +37,14 @@ class MotSummaryInformation(BaseModel):
     mot_tests: list[MotTest] = Field(alias="motTests", default=[])
 
 class MotErrorResponse(BaseModel):
-    error_message: str
+    error_message: str = Field(alias="errorMessage")
 
 MotApiResponseType = ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None
 MotInformationResponseType = MotSummaryInformation | MotErrorResponse | None
 
 async def MapToMotSummaryInformation(vehicle_mot_response: MotApiResponseType) -> MotInformationResponseType:
         if type(vehicle_mot_response) is ErrorResponse:
-            return MotErrorResponse(error_message=vehicle_mot_response.error_message if type(vehicle_mot_response.error_message) is str else "")
+            return MotErrorResponse.model_validate(vehicle_mot_response.to_dict())
         elif vehicle_mot_response is not None:
             return MotSummaryInformation.model_validate(vehicle_mot_response.to_dict())
 
@@ -56,8 +56,8 @@ async def fetch_mot_history(reg: str) -> MotInformationResponseType:
 
     msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
     result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])
-    if type(result) is not dict:
-        return MotErrorResponse(error_message="Unable to authenticate with the MOT API")
+    if type(result) is not dict or 'access_token' not in result:
+        return MotErrorResponse(errorMessage="Unable to authenticate with the MOT API")
     headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
     mot_client = MotClient(base_url="https://history.mot.api.gov.uk", headers=headers)
     async with mot_client:
