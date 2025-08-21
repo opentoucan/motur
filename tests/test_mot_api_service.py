@@ -1,5 +1,6 @@
 import datetime
 from unittest.mock import ANY
+from config import VehicleSettings
 from generated.mot_client.models.defect import Defect
 from generated.mot_client.models.defect_type import DefectType
 from generated.mot_client.models.dvsa_mot_test import DVSAMotTest
@@ -14,10 +15,13 @@ from generated.mot_client.models.vehicle_with_mot_response_has_outstanding_recal
 from mot_api_service import MotErrorResponse, MotSummaryInformation, MotTest, MotTestDefect, fetch_mot_history
 import pytest
 
+mock_settings = VehicleSettings(mot_client_id="mock", mot_tenant_id="mock", mot_client_secret="mock", mot_api_key="mock", ves_api_key="mock")
+
 @pytest.mark.asyncio
 async def test_fetch_vehicle_invalid_bearer_token_returns_mot_error_response(mocker):
   registration_plate = "AA11 AAA"
   mock_msal_client = mocker.Mock()
+  mocker.patch("mot_api_service.vehicle_settings", return_value=mock_settings)
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   mock_mot_client = mocker.patch("mot_api_service.get_v1_trade_vehicles_registration_registration.asyncio")
   result = await fetch_mot_history(registration_plate)
@@ -35,6 +39,7 @@ async def test_fetch_vehicle_mot_old_vehicle_returns_mot_summary_information(moc
     has_outstanding_recall=VehicleWithMotResponseHasOutstandingRecall.UNKNOWN,
     mot_tests=[DVSAMotTest(completed_date=now, test_result=DVSAMotTestTestResult.PASSED, data_source=DVSAMotTestDataSource.DVSA, odometer_result_type=DVSAMotTestOdometerResultType.READ, defects=[Defect(text="Rover won't turn over", type_=DefectType.DANGEROUS, dangerous=True)])]) # type: ignore
   mock_msal_client = mocker.Mock()
+  mocker.patch("mot_api_service.vehicle_settings", return_value=mock_settings)
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   mock_msal_client.acquire_token_for_client = mocker.Mock(return_value={'token_type': 'mock_token', 'access_token': 'blah'})
   mock_mot_client = mocker.patch("mot_api_service.get_v1_trade_vehicles_registration_registration.asyncio", return_value=mock_response)
@@ -56,6 +61,7 @@ async def test_fetch_vehicle_mot_new_reg_vehicle_returns_mot_summary_information
     has_outstanding_recall=NewRegVehicleResponseHasOutstandingRecall.UNKNOWN,
     mot_test_due_date=now.date()) # type: ignore
   mock_msal_client = mocker.Mock()
+  mocker.patch("mot_api_service.vehicle_settings", return_value=mock_settings)
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   mock_msal_client.acquire_token_for_client = mocker.Mock(return_value={'token_type': 'mock_token', 'access_token': 'blah'})
   mock_mot_client = mocker.patch("mot_api_service.get_v1_trade_vehicles_registration_registration.asyncio", return_value=mock_response)
@@ -73,6 +79,7 @@ async def test_fetch_vehicle_mot_returns_mot_error_response(mocker):
   registration_plate = "AA11 AAA"
   mock_response = ErrorResponse(error_message="Vehicle does not exist")
   mock_msal_client = mocker.Mock()
+  mocker.patch("mot_api_service.vehicle_settings", return_value=mock_settings)
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   mock_msal_client.acquire_token_for_client = mocker.Mock(return_value={'token_type': 'mock_token', 'access_token': 'blah'})
   mock_mot_client = mocker.patch("mot_api_service.get_v1_trade_vehicles_registration_registration.asyncio", return_value=mock_response)
