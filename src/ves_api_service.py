@@ -38,7 +38,7 @@ VehicleInformationResponseType = VehicleInformation | VehicleErrorResponse | Non
 
 async def MapToVehicleInformation(ves_response: VesApiResponseType) -> VehicleInformationResponseType:
         if type(ves_response) is ErrorResponse:
-            return VehicleErrorResponse(error_message=str(ves_response.to_dict()))
+            return VehicleErrorResponse(error_message=', '.join(str(x.detail) for x in ves_response.errors)) # type: ignore
         elif type(ves_response) is Vehicle:
             return VehicleInformation.model_validate(ves_response.to_dict())
 
