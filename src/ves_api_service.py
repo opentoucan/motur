@@ -36,15 +36,12 @@ class VehicleErrorResponse(BaseModel):
 VesApiResponseType = ErrorResponse | Vehicle | None
 VehicleInformationResponseType = VehicleInformation | VehicleErrorResponse | None
 
-async def MapToVehicleInformation(ves_response: VesApiResponseType) -> VehicleInformationResponseType:
-        if type(ves_response) is ErrorResponse:
-            return VehicleErrorResponse(error_message=', '.join(str(x.detail) for x in ves_response.errors)) # type: ignore
-        elif type(ves_response) is Vehicle:
-            return VehicleInformation.model_validate(ves_response.to_dict())
-
 async def fetch_vehicle_info(reg: str) -> VehicleInformationResponseType:
   headers = {'accept': 'application/json'}
   ves_client = VesClient(base_url="https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry", headers=headers)
   async with ves_client:
       ves_response: VesApiResponseType = await get_vehicle_details_by_registration_number.asyncio(client=ves_client, x_api_key=vehicle_settings.ves_api_key, body=VehicleRequest(registration_number=reg))
-      return await MapToVehicleInformation(ves_response)
+      if type(ves_response) is ErrorResponse:
+          return VehicleErrorResponse(error_message=', '.join(str(x.detail) for x in ves_response.errors)) # type: ignore
+      elif type(ves_response) is Vehicle:
+          return VehicleInformation.model_validate(ves_response.to_dict())
