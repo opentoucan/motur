@@ -9,7 +9,8 @@ app = FastAPI()
 
 @app.get("/reg/{reg}")
 async def read_mot_from_reg(reg: str):
-    return await vehicle_service.fetch_vehicle_information(reg)
+    vehicle_information = await vehicle_service.fetch_vehicle_information(reg)
+    return vehicle_information.model_dump()
 
 @app.get("/link/{url}")
 async def read_mot_from_webpage(url: str):
@@ -19,6 +20,7 @@ async def read_mot_from_webpage(url: str):
 
   registration_plate = await scraper.scrape_link(url)
   if registration_plate is not None:
-    return await vehicle_service.fetch_vehicle_information(registration_plate)
+    vehicle_information = await vehicle_service.fetch_vehicle_information(registration_plate)
+    return vehicle_information.model_dump()
 
   return "Could not find registration details"

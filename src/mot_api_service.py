@@ -1,7 +1,7 @@
 import msal
 from config import vehicle_settings
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from generated.mot_client import Client as MotClient
 from generated.mot_client.models.new_reg_vehicle_response import NewRegVehicleResponse
 from generated.mot_client.models.vehicle_with_mot_response import VehicleWithMotResponse
@@ -13,31 +13,32 @@ from generated.mot_client.models.error_response import ErrorResponse
 from generated.mot_client.types import Unset
 
 class MotTestDefect(BaseModel):
-    text: str | None
-    type: str | None
-    dangerous: bool | None
+    text: str | None = Field(alias="text", default=None)
+    type: str | None = Field(alias="type", default=None)
+    dangerous: bool | None = Field(alias="dangerous", default=None)
 
 class MotTest(BaseModel):
-    completed_date: datetime | None
-    test_result: str | None
-    odometer_read_result: str | None
-    datasource: str | None
-    registration_at_time_of_test: str | None
-    odometer_value: str | None
-    odometer_unit: str | None
-    mot_test_number: str | None
+    completed_date: datetime | None = Field(alias="completedDate", default=None)
+    test_result: str | None = Field(alias="testResult", default=None)
+    odometer_read_result: str | None = Field(alias="odometerResultType", default=None)
+    datasource: str | None = Field(alias="dataSource", default=None)
+    registration_at_time_of_test: str | None = Field(alias="registrationAtTimeOfTest", default=None)
+    expiry_date: str | None = Field(alias="expiryDate", default=None)
+    odometer_value: str | None = Field(alias="odometerValue", default=None)
+    odometer_unit: str | None = Field(alias="odometerUnit", default=None)
+    mot_test_number: str | None = Field(alias="motTestNumber", default=None)
 
 class MotSummaryInformation(BaseModel):
-    registration_plate: str | None
-    make: str | None
-    model: str | None
-    fuel_type: str | None
-    colour: str | None
-    engine_size: str | None
-    registation_date: date | None
-    manufacture_date: date | None
-    mot_test_due_date: date | None
-    mot_tests: list[MotTest]
+    registration_plate: str | None = Field(alias="registration", default=None)
+    make: str | None = Field(alias="make", default=None)
+    model: str | None = Field(alias="model", default=None)
+    fuel_type: str | None = Field(alias="fuelType", default=None)
+    colour: str | None = Field(alias="primaryColour", default=None)
+    engine_size: str | None = Field(alias="engineSize", default=None)
+    registation_date: date | None = Field(alias="registrationDate", default=None)
+    manufacture_date: date | None = Field(alias="manufactureDate", default=None)
+    first_mot_test_due_date: date | None = Field(alias="motTestDueDate", default=None)
+    mot_tests: list[MotTest] = Field(alias="motTests", default=[])
 
 class MotErrorResponse(BaseModel):
     error_message: str
@@ -45,50 +46,8 @@ class MotErrorResponse(BaseModel):
 async def MapToMotSummaryInformation(vehicle_mot_response: ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None) -> MotSummaryInformation | MotErrorResponse | None:
         if type(vehicle_mot_response) is ErrorResponse:
             return MotErrorResponse(error_message=vehicle_mot_response.error_message if type(vehicle_mot_response.error_message) is str else "")
-        elif type(vehicle_mot_response) is NewRegVehicleResponse:
-            return MotSummaryInformation(
-                registration_plate=vehicle_mot_response.registration if type(vehicle_mot_response.registration) is str else None,
-                make=vehicle_mot_response.make if type(vehicle_mot_response.make) is str else None,
-                model=vehicle_mot_response.model if type(vehicle_mot_response.model) is str else None,
-                fuel_type=vehicle_mot_response.fuel_type if type(vehicle_mot_response.fuel_type) is str else None,
-                colour=vehicle_mot_response.primary_colour if type(vehicle_mot_response.primary_colour) is str else None,
-                engine_size=None,
-                registation_date=vehicle_mot_response.registration_date if type(vehicle_mot_response.registration_date) is date else None,
-                manufacture_date=vehicle_mot_response.manufacture_date if type(vehicle_mot_response.manufacture_date) is date else None,
-                mot_test_due_date=vehicle_mot_response.mot_test_due_date if type(vehicle_mot_response.mot_test_due_date) is date else None,
-                mot_tests=[])
-        elif type(vehicle_mot_response) is VehicleWithMotResponse:
-            mot_tests: list[MotTest] = []
-            for mot_test_response in vehicle_mot_response.mot_tests:
-              mot_test_defects: list[MotTestDefect] = []
-              if (type (mot_test_response) is DVSAMotTest or type(mot_test_response) is CVSMotTest) and type(mot_test_response.defects) is list[Defect]:
-                  for defect in mot_test_response.defects:
-                      mot_test_defects.append(MotTestDefect(
-                          text=defect.text if type(defect.text) is str else None,
-                          type=defect.type_ if type(defect.type_) is str else None,
-                          dangerous=defect.dangerous if type(defect.dangerous) is bool else None))
-              mot_test = MotTest(
-                  completed_date=mot_test_response.completed_date,
-                  test_result=mot_test_response.test_result,
-                  odometer_read_result=mot_test_response.odometer_result_type,
-                  odometer_value=mot_test_response.odometer_value if type(mot_test_response.odometer_value) is str else None,
-                  odometer_unit=mot_test_response.odometer_unit if type(mot_test_response.odometer_unit) is not Unset else None, # type: ignore
-                  mot_test_number=mot_test_response.mot_test_number if type(mot_test_response.mot_test_number) is str else None,
-                  registration_at_time_of_test=mot_test_response.registration_at_time_of_test if type(mot_test_response.registration_at_time_of_test) is str else None,
-                  datasource=mot_test_response.data_source)
-              mot_tests.append(mot_test)
-
-            return MotSummaryInformation(
-                registration_plate=vehicle_mot_response.registration if type(vehicle_mot_response.registration) is str else None,
-                make=vehicle_mot_response.make if type(vehicle_mot_response.make) is str else None,
-                model=vehicle_mot_response.model if type(vehicle_mot_response.model) is str else None,
-                fuel_type=vehicle_mot_response.fuel_type if type(vehicle_mot_response.fuel_type) is str else None,
-                colour=vehicle_mot_response.primary_colour if type(vehicle_mot_response.primary_colour) is str else None,
-                engine_size=vehicle_mot_response.engine_size if type(vehicle_mot_response.engine_size) is str else None,
-                registation_date=vehicle_mot_response.registration_date if type(vehicle_mot_response.registration_date) is date else None,
-                manufacture_date=vehicle_mot_response.manufacture_date if type(vehicle_mot_response.manufacture_date) is date else None,
-                mot_test_due_date=None,
-                mot_tests=mot_tests)
+        elif vehicle_mot_response is not None:
+            return MotSummaryInformation.model_validate(vehicle_mot_response.to_dict())
 
 async def fetch_mot_history(reg: str) -> MotSummaryInformation | MotErrorResponse | None:
     client_id = vehicle_settings.mot_client_id
