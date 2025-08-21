@@ -49,9 +49,9 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
       - name: Install deps
-        run: uv sync
+        run: uv sync --only-dev
       - name: tests
-        run: uvx pytest@latest ./tests
+        run: uv run pytest ./tests
 
   image-build:
     name: check image build
