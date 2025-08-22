@@ -4,6 +4,8 @@ enabled_sites:
   - www.pistonheads.com
   - www.facebook.com
   - www.gumtree.com
+redis:
+  enabled: False
 scraper:
   chrome_binary_location: /usr/bin/chromium
   disable_sandbox: True
