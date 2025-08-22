@@ -1,12 +1,8 @@
-from config import vehicle_settings
+from hishel import AsyncCacheTransport
+import httpx
+from config import VehicleSettings
 from datetime import date
 from pydantic import BaseModel, Field
-from generated.ves_client import Client as VesClient
-from generated.ves_client.api.vehicle import get_vehicle_details_by_registration_number
-from generated.ves_client.models.vehicle import Vehicle
-from generated.ves_client.models.vehicle_request import VehicleRequest
-from generated.ves_client.models.error_response import ErrorResponse
-
 
 class VehicleInformation(BaseModel):
     registration_plate: str = Field(alias="registrationNumber")
@@ -30,18 +26,28 @@ class VehicleInformation(BaseModel):
     euro_status: str | None = Field(alias="euroStatus", default=None)
     automated_vehicle: bool | None = Field(alias="automatedVehicle", default=None)
 
+class Error(BaseModel):
+    status: str = Field(alias="status")
+    code: str = Field(alias="code")
+    title: str = Field(alias="title")
+    detail: str = Field(alias="detail")
+
 class VehicleErrorResponse(BaseModel):
-    error_message: str
+    errors: list[Error] = Field(alias="errors")
 
-VesApiResponseType = ErrorResponse | Vehicle | None
-VehicleInformationResponseType = VehicleInformation | VehicleErrorResponse | None
+class VesApiService:
+    http_transport: AsyncCacheTransport
+    vehicle_settings: VehicleSettings
 
-async def fetch_vehicle_info(reg: str) -> VehicleInformationResponseType:
-  headers = {'accept': 'application/json'}
-  ves_client = VesClient(base_url="https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry", headers=headers)
-  async with ves_client:
-      ves_response: VesApiResponseType = await get_vehicle_details_by_registration_number.asyncio(client=ves_client, x_api_key=vehicle_settings.ves_api_key, body=VehicleRequest(registration_number=reg))
-      if type(ves_response) is ErrorResponse:
-          return VehicleErrorResponse(error_message=', '.join(str(x.detail) for x in ves_response.errors)) # type: ignore
-      elif type(ves_response) is Vehicle:
-          return VehicleInformation.model_validate(ves_response.to_dict())
+    def __init__(self, http_transport, vehicle_settings):
+        self.http_transport = http_transport
+        self.vehicle_settings = vehicle_settings
+
+    async def fetch_vehicle_info(self, reg: str) -> VehicleInformation | VehicleErrorResponse | None:
+        async with httpx.AsyncClient(transport=self.http_transport) as client:
+            headers = {'accept': 'application/json','x-api-key': f'{self.vehicle_settings.ves_api_key}'}
+            response = await client.post('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles', headers=headers, json={'registrationNumber': reg})
+            if response.status_code == 200:
+                return VehicleInformation.model_validate_json(response.content)
+            else:
+                return VehicleErrorResponse.model_validate_json(response.content)

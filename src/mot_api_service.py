@@ -1,12 +1,9 @@
+from hishel import AsyncCacheTransport
+import httpx
 import msal
-from config import vehicle_settings
+from config import VehicleSettings
 from datetime import date, datetime
 from pydantic import BaseModel, Field
-from generated.mot_client import Client as MotClient
-from generated.mot_client.models.new_reg_vehicle_response import NewRegVehicleResponse
-from generated.mot_client.models.vehicle_with_mot_response import VehicleWithMotResponse
-from generated.mot_client.api.mot_history_api import get_v1_trade_vehicles_registration_registration
-from generated.mot_client.models.error_response import ErrorResponse
 
 class MotTestDefect(BaseModel):
     text: str | None = Field(alias="text", default=None)
@@ -38,27 +35,33 @@ class MotSummaryInformation(BaseModel):
     mot_tests: list[MotTest] = Field(alias="motTests", default=[])
 
 class MotErrorResponse(BaseModel):
-    error_message: str = Field(alias="errorMessage")
+    error_code: str | None = Field(alias="errorCode")
+    error_message: str | None = Field(alias="errorMessage")
+    request_id: str | None = Field(alias="requestId")
 
-MotApiResponseType = ErrorResponse | NewRegVehicleResponse | VehicleWithMotResponse | None
-MotInformationResponseType = MotSummaryInformation | MotErrorResponse | None
+class MotApiService:
+    http_transport: AsyncCacheTransport
+    vehicle_settings: VehicleSettings
 
-async def fetch_mot_history(reg: str) -> MotInformationResponseType:
-    client_id = vehicle_settings.mot_client_id
-    tenant_id = vehicle_settings.mot_tenant_id
-    client_secret = vehicle_settings.mot_client_secret
-    mot_api_key = vehicle_settings.mot_api_key
+    def __init__(self, http_transport, vehicle_settings):
+        self.http_transport = http_transport
+        self.vehicle_settings = vehicle_settings
 
-    msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
-    result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])
-    if type(result) is not dict or 'access_token' not in result:
-        return MotErrorResponse(errorMessage="Unable to authenticate with the MOT API")
+    async def fetch_mot_history(self, reg: str) -> MotSummaryInformation | MotErrorResponse:
+        client_id = self.vehicle_settings.mot_client_id
+        tenant_id = self.vehicle_settings.mot_tenant_id
+        client_secret = self.vehicle_settings.mot_client_secret
+        mot_api_key = self.vehicle_settings.mot_api_key
 
-    headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
-    mot_client = MotClient(base_url="https://history.mot.api.gov.uk", headers=headers)
-    async with mot_client:
-        vehicle_mot_response: MotApiResponseType = await get_v1_trade_vehicles_registration_registration.asyncio(client=mot_client, registration=reg)
-        if type(vehicle_mot_response) is ErrorResponse:
-            return MotErrorResponse.model_validate(vehicle_mot_response.to_dict())
-        elif vehicle_mot_response is not None:
-            return MotSummaryInformation.model_validate(vehicle_mot_response.to_dict())
+        msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
+        result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])
+        if type(result) is not dict or 'access_token' not in result:
+            return MotErrorResponse(errorCode="403", errorMessage="Unable to authenticate with the MOT API", requestId=None)
+
+        async with httpx.AsyncClient(transport=self.http_transport) as client:
+            headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
+            response = await client.get(f'https://history.mot.api.gov.uk/v1/trade/vehicles/registration/{reg}', headers=headers)
+            if response.status_code == 200:
+                return MotSummaryInformation.model_validate_json(response.content)
+            else:
+                return MotErrorResponse.model_validate_json(response.content)
