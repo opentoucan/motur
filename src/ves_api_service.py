@@ -4,7 +4,9 @@ from config import VehicleSettings
 from datetime import date
 from pydantic import BaseModel, Field
 
-class VehicleInformation(BaseModel):
+from error_details import ErrorDetails
+
+class VehicleRegistrationDetails(BaseModel):
     registration_plate: str = Field(alias="registrationNumber")
     tax_status: str | None = Field(alias="taxStatus", default=None)
     tax_due_date: date | None = Field(alias="taxDueDate", default=None)
@@ -43,11 +45,13 @@ class VesApiService:
         self.http_transport = http_transport
         self.vehicle_settings = vehicle_settings
 
-    async def fetch_vehicle_info(self, reg: str) -> VehicleInformation | VehicleErrorResponse | None:
+    async def fetch_vehicle_info(self, reg: str) -> VehicleRegistrationDetails | ErrorDetails:
         async with httpx.AsyncClient(transport=self.http_transport) as client:
             headers = {'accept': 'application/json','x-api-key': f'{self.vehicle_settings.ves_api_key}'}
             response = await client.post('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles', headers=headers, json={'registrationNumber': reg})
             if response.status_code == 200:
-                return VehicleInformation.model_validate_json(response.content)
+                return VehicleRegistrationDetails.model_validate_json(response.content)
             else:
-                return VehicleErrorResponse.model_validate_json(response.content)
+                error_response = VehicleErrorResponse.model_validate_json(response.content)
+                error = error_response.errors[0]
+                return ErrorDetails(internal_code=error.code, http_status_code=response.status_code, reason=error.detail)

@@ -2,7 +2,8 @@ from datetime import datetime
 import hishel
 from httpx import Response
 from config import VehicleSettings
-from mot_api_service import MotApiService, MotErrorResponse, MotSummaryInformation, MotTest, MotTestDefect
+from error_details import ErrorDetails
+from mot_api_service import MotApiService, VehicleMotDetails, VehicleMotDetailsErrorResponse, MotTest, Defect
 import pytest
 
 vehicle_settings = VehicleSettings(mot_client_id="blah", mot_tenant_id="blah", mot_api_key="blah", mot_client_secret="blah", ves_api_key="blah")
@@ -15,13 +16,13 @@ async def test_fetch_vehicle_invalid_bearer_token_returns_mot_error_response(moc
   mock_msal_client = mocker.Mock()
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   result = await mot_api_service.fetch_mot_history(registration_plate)
-  assert result == MotErrorResponse(errorMessage="Unable to authenticate with the MOT API", errorCode="403", requestId=None)
+  assert result == ErrorDetails(internal_code=None, http_status_code=403, reason="Unable to authenticate with the MOT API")
 
 @pytest.mark.asyncio
 async def test_fetch_vehicle_mot_old_vehicle_returns_mot_summary_information(mocker):
   registration_plate = "AA11 AAA"
   now = datetime.now()
-  response_json = MotSummaryInformation(
+  response_json = VehicleMotDetails(
     registration="AA11 AAA",
       make="ford",
       motTests=[MotTest(
@@ -29,7 +30,7 @@ async def test_fetch_vehicle_mot_old_vehicle_returns_mot_summary_information(moc
           testResult="PASSED",
             dataSource="DVSA",
             odometerResultType="READ",
-              defects=[MotTestDefect(
+              defects=[Defect(
                   text="Rover won't turn over",
                   type="MAJOR",
                   dangerous=False
@@ -40,17 +41,17 @@ async def test_fetch_vehicle_mot_old_vehicle_returns_mot_summary_information(moc
   mocker.patch("mot_api_service.msal.ConfidentialClientApplication", return_value=mock_msal_client)
   mock_msal_client.acquire_token_for_client = mocker.Mock(return_value={'token_type': 'mock_token', 'access_token': 'blah'})
   result = await mot_api_service.fetch_mot_history(registration_plate)
-  assert result == MotSummaryInformation(
+  assert result == VehicleMotDetails(
     registration=registration_plate,
     make="ford",
-    motTests=[MotTest(completedDate=now, testResult="PASSED", dataSource="DVSA", odometerResultType="READ", defects=[MotTestDefect(text="Rover won't turn over", type="MAJOR", dangerous=False)])])
+    motTests=[MotTest(completedDate=now, testResult="PASSED", dataSource="DVSA", odometerResultType="READ", defects=[Defect(text="Rover won't turn over", type="MAJOR", dangerous=False)])])
 
 @pytest.mark.asyncio
 async def test_fetch_vehicle_mot_new_reg_vehicle_returns_mot_summary_information(mocker):
   registration_plate = "AA11 AAA"
   make = "ford"
   mot_due_date = datetime.now().date()
-  response_json = MotSummaryInformation(
+  response_json = VehicleMotDetails(
     registration=registration_plate,
     make=make,
     motTestDueDate=mot_due_date).model_dump_json(by_alias=True)
@@ -62,7 +63,7 @@ async def test_fetch_vehicle_mot_new_reg_vehicle_returns_mot_summary_information
 
   result = await mot_api_service.fetch_mot_history(registration_plate)
 
-  assert result == MotSummaryInformation(
+  assert result == VehicleMotDetails(
     registration=registration_plate,
     make=make,
     motTestDueDate=mot_due_date,
@@ -73,7 +74,7 @@ async def test_fetch_vehicle_mot_no_matching_reg_returns_mot_error_response(mock
   registration_plate = "AA11 AAA"
   error_code = "404"
   error_message = f"Vehicle not found with reg [{registration_plate}]"
-  response_json = MotErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None).model_dump_json(by_alias=True)
+  response_json = VehicleMotDetailsErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None).model_dump_json(by_alias=True)
   mock_http_transport.add_responses(responses=[Response(status_code=int(error_code), content=response_json)])
   mock_msal_client = mocker.Mock()
 
@@ -82,14 +83,14 @@ async def test_fetch_vehicle_mot_no_matching_reg_returns_mot_error_response(mock
 
   result = await mot_api_service.fetch_mot_history(registration_plate)
 
-  assert result == MotErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None)
+  assert result == ErrorDetails(internal_code=error_code, http_status_code=int(error_code), reason=error_message)
 
 @pytest.mark.asyncio
 async def test_fetch_vehicle_mot_invalid_api_key_returns_mot_error_response(mocker):
   registration_plate = "AA11 AAA"
   error_code = "403"
   error_message = "Not allowed to access this resource"
-  response_json = MotErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None).model_dump_json(by_alias=True)
+  response_json = VehicleMotDetailsErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None).model_dump_json(by_alias=True)
   mock_http_transport.add_responses(responses=[Response(status_code=int(error_code), content=response_json)])
   mock_msal_client = mocker.Mock()
 
@@ -98,4 +99,4 @@ async def test_fetch_vehicle_mot_invalid_api_key_returns_mot_error_response(mock
 
   result = await mot_api_service.fetch_mot_history(registration_plate)
 
-  assert result == MotErrorResponse(errorCode=error_code, errorMessage=error_message, requestId=None)
+  assert result == ErrorDetails(internal_code=error_code, http_status_code=int(error_code), reason=error_message)

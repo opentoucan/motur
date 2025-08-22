@@ -20,7 +20,7 @@ vehicle_service: VehicleService = VehicleService(MotApiService(http_transport, v
 async def read_mot_from_reg(reg: str):
 
     vehicle_information = await vehicle_service.fetch_vehicle_information(reg)
-    return vehicle_information.model_dump()
+    return vehicle_information.model_dump(exclude_none=True)
 
 @app.post("/link")
 async def read_mot_from_webpage(webpage: WebpageScrape):
@@ -31,6 +31,6 @@ async def read_mot_from_webpage(webpage: WebpageScrape):
   registration_plate = await scraper.scrape_link(webpage.url)
   if registration_plate is not None:
     vehicle_information = await vehicle_service.fetch_vehicle_information(registration_plate)
-    return vehicle_information.model_dump()
+    return vehicle_information.model_dump(exclude_none=True)
 
-  return "Could not find registration details"
+  raise HTTPException(status_code=400, detail="Could not identify the vehicle on the page")

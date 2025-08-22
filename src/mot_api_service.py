@@ -5,7 +5,9 @@ from config import VehicleSettings
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 
-class MotTestDefect(BaseModel):
+from error_details import ErrorDetails
+
+class Defect(BaseModel):
     text: str | None = Field(alias="text", default=None)
     type: str | None = Field(alias="type", default=None)
     dangerous: bool | None = Field(alias="dangerous", default=None)
@@ -20,9 +22,9 @@ class MotTest(BaseModel):
     odometer_value: str | None = Field(alias="odometerValue", default=None)
     odometer_unit: str | None = Field(alias="odometerUnit", default=None)
     mot_test_number: str | None = Field(alias="motTestNumber", default=None)
-    defects: list[MotTestDefect] = Field(alias="defects", default=[])
+    defects: list[Defect] = Field(alias="defects", default=[])
 
-class MotSummaryInformation(BaseModel):
+class VehicleMotDetails(BaseModel):
     registration_plate: str | None = Field(alias="registration", default=None)
     make: str | None = Field(alias="make", default=None)
     model: str | None = Field(alias="model", default=None)
@@ -34,7 +36,7 @@ class MotSummaryInformation(BaseModel):
     first_mot_test_due_date: date | None = Field(alias="motTestDueDate", default=None)
     mot_tests: list[MotTest] = Field(alias="motTests", default=[])
 
-class MotErrorResponse(BaseModel):
+class VehicleMotDetailsErrorResponse(BaseModel):
     error_code: str | None = Field(alias="errorCode")
     error_message: str | None = Field(alias="errorMessage")
     request_id: str | None = Field(alias="requestId")
@@ -47,7 +49,7 @@ class MotApiService:
         self.http_transport = http_transport
         self.vehicle_settings = vehicle_settings
 
-    async def fetch_mot_history(self, reg: str) -> MotSummaryInformation | MotErrorResponse:
+    async def fetch_mot_history(self, reg: str) -> VehicleMotDetails | ErrorDetails:
         client_id = self.vehicle_settings.mot_client_id
         tenant_id = self.vehicle_settings.mot_tenant_id
         client_secret = self.vehicle_settings.mot_client_secret
@@ -56,12 +58,13 @@ class MotApiService:
         msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
         result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])
         if type(result) is not dict or 'access_token' not in result:
-            return MotErrorResponse(errorCode="403", errorMessage="Unable to authenticate with the MOT API", requestId=None)
+            return ErrorDetails(internal_code=None, http_status_code=403, reason="Unable to authenticate with the MOT API")
 
         async with httpx.AsyncClient(transport=self.http_transport) as client:
             headers = {'accept': 'application/json','Authorization': f'{result['token_type']} {result['access_token']}','X-API-Key': f'{mot_api_key}'}
             response = await client.get(f'https://history.mot.api.gov.uk/v1/trade/vehicles/registration/{reg}', headers=headers)
             if response.status_code == 200:
-                return MotSummaryInformation.model_validate_json(response.content)
+                return VehicleMotDetails.model_validate_json(response.content)
             else:
-                return MotErrorResponse.model_validate_json(response.content)
+                api_error = VehicleMotDetailsErrorResponse.model_validate_json(response.content)
+                return ErrorDetails(internal_code=api_error.error_code, http_status_code=response.status_code, reason=api_error.error_message)

@@ -1,10 +1,20 @@
 from pydantic import BaseModel
-from ves_api_service import VesApiService, VehicleInformation, VehicleErrorResponse
-from mot_api_service import MotApiService, MotErrorResponse, MotSummaryInformation
+from error_details import ErrorDetails
+from ves_api_service import VesApiService, VehicleRegistrationDetails
+from mot_api_service import MotApiService, VehicleMotDetails
 
-class VehicleAndMotInformation(BaseModel):
-    mot_information: MotSummaryInformation | MotErrorResponse | None
-    vehicle_information: VehicleInformation | VehicleErrorResponse | None
+
+class RegistrationResponse(BaseModel):
+   details: VehicleRegistrationDetails | None
+   error_details: ErrorDetails | None
+
+class MotResponse(BaseModel):
+   details: VehicleMotDetails | None
+   error_details: ErrorDetails | None
+
+class RegistrationAndMotResponse(BaseModel):
+    registration_response: RegistrationResponse | None
+    mot_response: MotResponse | None
 
 class VehicleService:
   mot_api_service: MotApiService
@@ -14,9 +24,13 @@ class VehicleService:
     self.mot_api_service = mot_api_service
     self.ves_api_service = ves_api_service
 
-  async def fetch_vehicle_information(self, registration_plate: str) -> VehicleAndMotInformation:
+  async def fetch_vehicle_information(self, registration_plate: str) -> RegistrationAndMotResponse:
 
-    vehicle_information = await self.ves_api_service.fetch_vehicle_info(registration_plate)
-    mot_summary = await self.mot_api_service.fetch_mot_history(reg=registration_plate)
-    vehicle_and_mot_information = VehicleAndMotInformation.model_validate({"mot_information" : mot_summary, "vehicle_information": vehicle_information})
-    return vehicle_and_mot_information
+    ves_api_response = await self.ves_api_service.fetch_vehicle_info(registration_plate)
+    mot_api_response = await self.mot_api_service.fetch_mot_history(reg=registration_plate)
+
+    ves_details : VehicleRegistrationDetails | None = ves_api_response if type(ves_api_response) is VehicleRegistrationDetails else None
+    ves_error_details : ErrorDetails | None = ves_api_response if type(ves_api_response) is ErrorDetails else None
+    mot_details : VehicleMotDetails | None = mot_api_response if type(mot_api_response) is VehicleMotDetails else None
+    mot_error_details : ErrorDetails | None = mot_api_response if type(mot_api_response) is ErrorDetails else None
+    return RegistrationAndMotResponse(registration_response=RegistrationResponse(details=ves_details, error_details=ves_error_details), mot_response=MotResponse(details=mot_details, error_details=mot_error_details))
