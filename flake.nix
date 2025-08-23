@@ -37,7 +37,7 @@
               go-task
               pre-commit
               act
-              google-chrome
+              chromium
               gcc
               glibc
               zlib
