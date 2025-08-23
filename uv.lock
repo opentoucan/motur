@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.13.*"
 
 [[package]]
@@ -594,7 +594,7 @@ requires-dist = [
     { name = "msal", specifier = "==1.33.0" },
     { name = "pydantic", specifier = "==2.11.7" },
     { name = "pydantic-settings", specifier = "==2.10.1" },
-    { name = "pydoll-python", specifier = "==2.6.0" },
+    { name = "pydoll-python", specifier = "==2.7.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "requests", specifier = "==2.32.5" },
     { name = "validators", specifier = ">=0.35.0" },
@@ -902,7 +902,7 @@ wheels = [
 
 [[package]]
 name = "pydoll-python"
-version = "2.6.0"
+version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -910,9 +910,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b6/7c/ec587f08a095f65914c56124f0c77e07101e57d51433e5a83341cae167b1/pydoll_python-2.6.0.tar.gz", hash = "sha256:8d9c543d10fe825464bb88592f303191aaa1152e57fcfbcc828ced6715b94ad0", size = 166105, upload-time = "2025-08-10T22:03:32.851Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/03/f8/2173a67c02bd5517fd0a032465f6f0879054d0bd2bee20cd8f585de1f38a/pydoll_python-2.7.0.tar.gz", hash = "sha256:350ec18552f7118b0b518c92c26ba8b37e76cb2acbae850673e2d7ce8be9bd15", size = 167959, upload-time = "2025-08-22T06:28:11.61Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/1b/52f51eea140d12b0310f94bc2eb886c84ebe1669fbcb50b112c8a6e9a8cd/pydoll_python-2.6.0-py3-none-any.whl", hash = "sha256:dca4588d4e54f7b9e39bb7219e098afe0cae66f43b0b5959007b3c7875d03c82", size = 191280, upload-time = "2025-08-10T22:03:31.433Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/e2/e4df3555d5cf6abebaff753dd61f796a29b875d1ff63474d09ecef11eb81/pydoll_python-2.7.0-py3-none-any.whl", hash = "sha256:e39565ddb202b69a58c2729140e78db17da90d03f646bb962b7c81245f6b298b", size = 192707, upload-time = "2025-08-22T06:28:10.401Z" },
 ]
 
 [[package]]
