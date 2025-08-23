@@ -3,8 +3,6 @@ from httpx import AsyncHTTPTransport
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
 
-
-
 class Settings(BaseSettings):
     class MotApi(BaseModel):
         client_id: str
@@ -15,22 +13,22 @@ class Settings(BaseSettings):
     class VesApi(BaseModel):
         api_key: str
 
-    class ScraperSettings(BaseModel):
+    class Scraper(BaseModel):
         chrome_binary_location: str
         disable_sandbox: bool
         image_path: str
 
     class Redis(BaseModel):
-        enabled: bool = False
         host: str = "localhost"
         port: int = 6379
         password: str
+        ttl_seconds: int = 300
 
-    model_config = SettingsConfigDict(yaml_file="config.yaml", env_prefix="MOTUR__", env_nested_delimiter="__")
+    model_config = SettingsConfigDict(yaml_file="config.yaml", env_nested_delimiter="__")
     mot_api: MotApi
     ves_api: VesApi
     enabled_sites: list[str]
-    scraper: ScraperSettings
+    scraper: Scraper
     redis: Redis | None = None
 
     @classmethod
@@ -42,15 +40,13 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        return (YamlConfigSettingsSource(settings_cls), EnvSettingsSource(settings_cls) )
+        return (init_settings, YamlConfigSettingsSource(settings_cls), EnvSettingsSource(settings_cls) )
 
-settings = Settings() # type: ignore
-
-def GetHishelTransport():
+def GetHishelTransport(settings: Settings):
     import redis.asyncio as redis
     storage = AsyncBaseStorage()
-    if settings.redis is not None and settings.redis.enabled:
-        storage = AsyncRedisStorage(client=redis.Redis(host=settings.redis.host,port=settings.redis.port, password=settings.redis.password), ttl=300) # type: ignore
+    if settings.redis is not None:
+        storage = AsyncRedisStorage(client=redis.Redis(host=settings.redis.host,port=settings.redis.port, password=settings.redis.password), ttl=settings.redis.ttl_seconds)
     else:
         storage = AsyncInMemoryStorage(capacity=64)
     transport = AsyncCacheTransport(

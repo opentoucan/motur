@@ -10,7 +10,8 @@ fake_settings = Settings(
   ves_api=Settings.VesApi(api_key="blah"),
   mot_api=Settings.MotApi(client_id="blah", tenant_id="blah", api_key="blah", client_secret="blah"),
   enabled_sites=[""],
-  scraper=Settings.ScraperSettings(chrome_binary_location="dummy_path", disable_sandbox=False, image_path="dummy_path"))
+  scraper=Settings.Scraper(chrome_binary_location="dummy_path", disable_sandbox=False, image_path="dummy_path"),
+  redis=None)
 
 mock_http_transport = hishel.MockAsyncTransport()
 mot_api_service: MotApiService = MotApiService(mock_http_transport, fake_settings)

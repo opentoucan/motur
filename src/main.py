@@ -2,18 +2,20 @@ from pydantic import BaseModel
 from mot_api_service import MotApiService
 from ves_api_service import VesApiService
 from vehicle_service import VehicleService
-import scraper
+from scraper_service import ScraperService
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from urllib.parse import urlparse
-from config import GetHishelTransport, settings
+from config import GetHishelTransport, Settings
 
 class WebpageScrape(BaseModel):
    url: str
 
 app = FastAPI()
-http_transport = GetHishelTransport()
+settings = Settings() # type: ignore
+http_transport = GetHishelTransport(settings)
 vehicle_service: VehicleService = VehicleService(MotApiService(http_transport, settings), VesApiService(http_transport, settings))
+scraper_service: ScraperService = ScraperService(settings)
 
 @app.get("/reg/{reg}")
 async def read_mot_from_reg(reg: str):
@@ -26,7 +28,7 @@ async def read_mot_from_webpage(webpage: WebpageScrape):
   if domain not in settings.enabled_sites:
     raise HTTPException(status_code=400, detail=f"Website {domain} is not enabled")
 
-  registration_plate = await scraper.scrape_link(webpage.url)
+  registration_plate = await scraper_service.scrape_link(webpage.url)
   if registration_plate is not None:
     vehicle_information = await vehicle_service.fetch_vehicle_information(registration_plate)
     return vehicle_information.model_dump(exclude_none=True)
