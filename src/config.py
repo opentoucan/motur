@@ -1,6 +1,6 @@
 from hishel import Controller, AsyncRedisStorage, AsyncInMemoryStorage, AsyncCacheTransport, AsyncBaseStorage
 from httpx import AsyncHTTPTransport
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
 
 
