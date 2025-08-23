@@ -1,7 +1,7 @@
 from hishel import AsyncCacheTransport
 import httpx
 import msal
-from config import VehicleSettings
+from config import Settings
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 
@@ -43,17 +43,17 @@ class VehicleMotDetailsErrorResponse(BaseModel):
 
 class MotApiService:
     http_transport: AsyncCacheTransport
-    vehicle_settings: VehicleSettings
+    settings: Settings
 
-    def __init__(self, http_transport, vehicle_settings):
+    def __init__(self, http_transport, settings):
         self.http_transport = http_transport
-        self.vehicle_settings = vehicle_settings
+        self.settings = settings
 
     async def fetch_mot_history(self, reg: str) -> VehicleMotDetails | ErrorDetails:
-        client_id = self.vehicle_settings.mot_client_id
-        tenant_id = self.vehicle_settings.mot_tenant_id
-        client_secret = self.vehicle_settings.mot_client_secret
-        mot_api_key = self.vehicle_settings.mot_api_key
+        client_id = self.settings.mot_api.client_id
+        tenant_id = self.settings.mot_api.tenant_id
+        client_secret = self.settings.mot_api.client_secret
+        mot_api_key = self.settings.mot_api.api_key
 
         msal_client = msal.ConfidentialClientApplication(client_id, authority=f"https://login.microsoftonline.com/{tenant_id}", client_credential=client_secret)
         result = msal_client.acquire_token_for_client(scopes=["https://tapi.dvsa.gov.uk/.default"])

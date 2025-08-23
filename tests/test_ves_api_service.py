@@ -1,13 +1,18 @@
 from httpx import Response
+from config import Settings
 from error_details import ErrorDetails
 import pytest
 import hishel
-from config import VehicleSettings
 from ves_api_service import Error, VehicleErrorResponse, VehicleRegistrationDetails, VesApiService
 
-vehicle_settings = VehicleSettings(mot_client_id="blah", mot_tenant_id="blah", mot_api_key="blah", mot_client_secret="blah", ves_api_key="blah")
+fake_settings = Settings(
+  ves_api=Settings.VesApi(api_key="blah"),
+  mot_api=Settings.MotApi(client_id="blah", tenant_id="blah", api_key="blah", client_secret="blah"),
+  enabled_sites=[""],
+  scraper=Settings.ScraperSettings(chrome_binary_location="dummy_path", disable_sandbox=False, image_path="dummy_path"))
+
 mock_http_transport = hishel.MockAsyncTransport()
-ves_api_service: VesApiService = VesApiService(mock_http_transport, vehicle_settings)
+ves_api_service: VesApiService = VesApiService(mock_http_transport, fake_settings)
 
 @pytest.mark.asyncio
 async def test_fetch_vehicle_info_returns_vehicle_information():

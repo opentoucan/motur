@@ -1,14 +1,19 @@
 from datetime import datetime
 import hishel
 from httpx import Response
-from config import VehicleSettings
+from config import Settings
 from error_details import ErrorDetails
 from mot_api_service import MotApiService, VehicleMotDetails, VehicleMotDetailsErrorResponse, MotTest, Defect
 import pytest
 
-vehicle_settings = VehicleSettings(mot_client_id="blah", mot_tenant_id="blah", mot_api_key="blah", mot_client_secret="blah", ves_api_key="blah")
+fake_settings = Settings(
+  ves_api=Settings.VesApi(api_key="blah"),
+  mot_api=Settings.MotApi(client_id="blah", tenant_id="blah", api_key="blah", client_secret="blah"),
+  enabled_sites=[""],
+  scraper=Settings.ScraperSettings(chrome_binary_location="dummy_path", disable_sandbox=False, image_path="dummy_path"))
+
 mock_http_transport = hishel.MockAsyncTransport()
-mot_api_service: MotApiService = MotApiService(mock_http_transport, vehicle_settings)
+mot_api_service: MotApiService = MotApiService(mock_http_transport, fake_settings)
 
 @pytest.mark.asyncio
 async def test_fetch_vehicle_invalid_bearer_token_returns_mot_error_response(mocker):

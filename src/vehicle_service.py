@@ -26,8 +26,9 @@ class VehicleService:
 
   async def fetch_vehicle_information(self, registration_plate: str) -> RegistrationAndMotResponse:
 
-    ves_api_response = await self.ves_api_service.fetch_vehicle_info(registration_plate)
-    mot_api_response = await self.mot_api_service.fetch_mot_history(reg=registration_plate)
+    normalised_reg = bytes(registration_plate, 'utf-8').decode('utf-8', 'ignore').replace(" ", "").upper()
+    ves_api_response = await self.ves_api_service.fetch_vehicle_info(normalised_reg)
+    mot_api_response = await self.mot_api_service.fetch_mot_history(reg=normalised_reg)
 
     ves_details : VehicleRegistrationDetails | None = ves_api_response if type(ves_api_response) is VehicleRegistrationDetails else None
     ves_error_details : ErrorDetails | None = ves_api_response if type(ves_api_response) is ErrorDetails else None

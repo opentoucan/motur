@@ -1,31 +1,37 @@
 from hishel import Controller, AsyncRedisStorage, AsyncInMemoryStorage, AsyncCacheTransport, AsyncBaseStorage
 from httpx import AsyncHTTPTransport
-from pydantic import BaseModel
-from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
 
-class VehicleSettings(BaseSettings):
-  mot_client_id: str
-  mot_tenant_id: str
-  mot_client_secret: str
-  mot_api_key: str
-  ves_api_key: str
 
-class ScraperSettings(BaseModel):
-    chrome_binary_location: str
-    disable_sandbox: bool
-    image_path: str
-
-class RedisSettings(BaseModel):
-    enabled: bool = False
-    host: str = "localhost"
-    port: int = 6379
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(yaml_file="config.yaml")
+    class MotApi(BaseModel):
+        client_id: str
+        tenant_id: str
+        client_secret: str
+        api_key: str
 
+    class VesApi(BaseModel):
+        api_key: str
+
+    class ScraperSettings(BaseModel):
+        chrome_binary_location: str
+        disable_sandbox: bool
+        image_path: str
+
+    class Redis(BaseModel):
+        enabled: bool = False
+        host: str = "localhost"
+        port: int = 6379
+        password: str
+
+    model_config = SettingsConfigDict(yaml_file="config.yaml", env_prefix="MOTUR__", env_nested_delimiter="__")
+    mot_api: MotApi
+    ves_api: VesApi
     enabled_sites: list[str]
     scraper: ScraperSettings
-    redis: RedisSettings | None = None
+    redis: Redis | None = None
 
     @classmethod
     def settings_customise_sources(
@@ -36,16 +42,15 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        return (YamlConfigSettingsSource(settings_cls), )
+        return (YamlConfigSettingsSource(settings_cls), EnvSettingsSource(settings_cls) )
 
 settings = Settings() # type: ignore
 
 def GetHishelTransport():
     import redis.asyncio as redis
     storage = AsyncBaseStorage()
-    redis_settings = RedisSettings() # type: ignore
     if settings.redis is not None and settings.redis.enabled:
-        storage = AsyncRedisStorage(client=redis.Redis(host=redis_settings.host,port=redis_settings.port), ttl=300) # type: ignore
+        storage = AsyncRedisStorage(client=redis.Redis(host=settings.redis.host,port=settings.redis.port, password=settings.redis.password), ttl=300) # type: ignore
     else:
         storage = AsyncInMemoryStorage(capacity=64)
     transport = AsyncCacheTransport(

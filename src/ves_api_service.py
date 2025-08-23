@@ -1,6 +1,6 @@
 from hishel import AsyncCacheTransport
 import httpx
-from config import VehicleSettings
+from config import Settings
 from datetime import date
 from pydantic import BaseModel, Field
 
@@ -39,15 +39,15 @@ class VehicleErrorResponse(BaseModel):
 
 class VesApiService:
     http_transport: AsyncCacheTransport
-    vehicle_settings: VehicleSettings
+    settings: Settings
 
-    def __init__(self, http_transport, vehicle_settings):
+    def __init__(self, http_transport, settings):
         self.http_transport = http_transport
-        self.vehicle_settings = vehicle_settings
+        self.settings = settings
 
     async def fetch_vehicle_info(self, reg: str) -> VehicleRegistrationDetails | ErrorDetails:
         async with httpx.AsyncClient(transport=self.http_transport) as client:
-            headers = {'accept': 'application/json','x-api-key': f'{self.vehicle_settings.ves_api_key}'}
+            headers = {'accept': 'application/json','x-api-key': f'{self.settings.ves_api.api_key}'}
             response = await client.post('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles', headers=headers, json={'registrationNumber': reg})
             if response.status_code == 200:
                 return VehicleRegistrationDetails.model_validate_json(response.content)
