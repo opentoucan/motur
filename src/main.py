@@ -5,7 +5,7 @@ from vehicle_service import VehicleService
 from scraper_service import ScraperService
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from config import GetHishelTransport, Settings
 
 class WebpageScrape(BaseModel):
@@ -24,11 +24,13 @@ async def read_mot_from_reg(reg: str):
 
 @app.post("/link")
 async def read_mot_from_webpage(webpage: WebpageScrape):
-  domain = urlparse(webpage.url).netloc
+  parsed_url = urlparse(webpage.url)
+  normalised_url = urljoin(webpage.url, parsed_url.path)
+  domain = parsed_url.netloc
   if domain not in settings.enabled_sites:
     raise HTTPException(status_code=400, detail=f"Website {domain} is not enabled")
 
-  registration_plate = await scraper_service.scrape_link(webpage.url)
+  registration_plate = await scraper_service.scrape_link(normalised_url)
   if registration_plate is not None:
     vehicle_information = await vehicle_service.fetch_vehicle_information(registration_plate)
     return vehicle_information.model_dump(exclude_none=True)
