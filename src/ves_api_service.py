@@ -14,7 +14,7 @@ class VehicleRegistrationDetails(BaseModel):
     mot_status: str | None = Field(alias="motStatus", default=None)
     mot_expiry_date: date | None = Field(alias="motExpiryDate", default=None)
     make: str | None = Field(alias="make", default=None)
-    month_of_first_registration: date | None = Field(alias="monthOfFirstDvlaRegistration", default=None)
+    month_of_first_registration: str | None = Field(alias="monthOfFirstDvlaRegistration", default=None)
     year_of_manufacture: int | None = Field(alias="yearOfManufacture", default=None)
     engine_capacity_in_cc: int | None = Field(alias="engineCapacity", default=None)
     co2_emissions_in_gram_per_km: int | None = Field(alias="co2Emissions", default=None)
