@@ -1,7 +1,7 @@
 import os
 import glob
 import validators
-import anpr_service
+from anpr_service import AnprService
 from pydoll.browser import Chrome
 from pydoll.browser.options import ChromiumOptions
 from urllib.parse import urlparse
@@ -11,9 +11,11 @@ from typing import Optional
 
 class ScraperService:
     settings: Settings
+    anpr_service: AnprService
 
-    def __init__(self, settings):
+    def __init__(self, settings, anpr_service):
         self.settings = settings
+        self.anpr_service = anpr_service
 
     async def scrape_link(self, url: str) -> Optional[str]:
       options = ChromiumOptions()
@@ -41,7 +43,7 @@ class ScraperService:
             img_tab = await browser.new_tab(image_src)
             image_name = os.path.basename(urlparse(image_src).path)
             await img_tab.take_screenshot(f"{self.settings.scraper.image_path}/{image_name}.png")
-            registration_plate = anpr_service.find_registration_plate(f"{self.settings.scraper.image_path}/{image_name}.png")
+            registration_plate = self.anpr_service.find_registration_plate(f"{self.settings.scraper.image_path}/{image_name}.png")
             if registration_plate is not None:
               break
 
