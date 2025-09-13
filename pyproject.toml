@@ -9,7 +9,7 @@ dependencies = [
   "fast-alpr[onnx]==0.3.0",
   "fastapi[standard]==0.116.1",
   "msal==1.33.0",
-  "pydantic==2.11.7",
+  "pydantic==2.11.9",
   "pydantic-settings==2.10.1",
   "pydoll-python==2.8.0",
   "python-dateutil>=2.9.0.post0",
