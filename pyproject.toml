@@ -7,7 +7,7 @@ requires-python = "==3.13.*"
 dependencies = [
   "datetime>=5.5",
   "fast-alpr[onnx]==0.3.0",
-  "fastapi[standard]==0.116.1",
+  "fastapi[standard]==0.117.1",
   "msal==1.33.0",
   "pydantic==2.11.9",
   "pydantic-settings==2.10.1",
