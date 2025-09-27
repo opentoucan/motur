@@ -575,7 +575,7 @@ requires-dist = [
     { name = "msal", specifier = "==1.33.0" },
     { name = "pydantic", specifier = "==2.11.9" },
     { name = "pydantic-settings", specifier = "==2.10.1" },
-    { name = "pydoll-python", specifier = "==2.8.0" },
+    { name = "pydoll-python", specifier = "==2.8.1" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "requests", specifier = "==2.32.5" },
     { name = "validators", specifier = ">=0.35.0" },
@@ -900,7 +900,7 @@ wheels = [
 
 [[package]]
 name = "pydoll-python"
-version = "2.8.0"
+version = "2.8.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -908,9 +908,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/5d/b43a5eaa0a80aa7a74b623e365ab9d1882925aa8fbe0d7043b5feeeec935/pydoll_python-2.8.0.tar.gz", hash = "sha256:92069b160d33d5e06300e5452b468d7c5f84c4cf4150ef00bd6c6ccebd1621f6", size = 169774, upload-time = "2025-08-28T04:11:22.814Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/86/90/289b0c08fe3641d9743f85957943b97d684be9e499b591ed448c3c293cb6/pydoll_python-2.8.1.tar.gz", hash = "sha256:aae8125989ec7e2f9abc3503501a5e8f5508d2963cd5d9d3c9673a9779acf40c", size = 169788, upload-time = "2025-09-27T02:28:35.894Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/45/7be5605fb2b9cecfb905a0ed6c042168b7fdfb53cb4e997d88fb94cf24dc/pydoll_python-2.8.0-py3-none-any.whl", hash = "sha256:6c5fe22c3b61af74695c466f5adb361a604f10f34a483d2832b196b1b00d9e1c", size = 194644, upload-time = "2025-08-28T04:11:21.671Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/f9/ebf58bf2becc04840ce26ab55a151a5a8973ac1f4ed14cae37895d97a1a5/pydoll_python-2.8.1-py3-none-any.whl", hash = "sha256:299900bf9ec88e1c2167b04fbeffc0dad8e999de2f42567b3ac543d2706a80fd", size = 194687, upload-time = "2025-09-27T02:28:34.574Z" },
 ]
 
 [[package]]
