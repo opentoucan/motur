@@ -1,4 +1,4 @@
-ARG PYTHON_SLIM=docker.io/python:3.13
+ARG PYTHON_SLIM=docker.io/python:3.14
 FROM ${PYTHON_SLIM} AS builder
 ARG USERNAME=app
 ARG USER_UID=2048
