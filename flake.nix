@@ -42,6 +42,7 @@
               glibc
               zlib
               mise
+              renovate
               ;
           };
         };
