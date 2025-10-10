@@ -1,20 +1,38 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "local>opentoucan/renovate-config",
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Update UV Version in pyproject.toml",
+      fileMatch: ["(^|.*/)pyproject.toml$"],
+      matchStrings: ["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\s+?([^\"]*)\"[>|=]+(?<currentValue>[\\d\\.]+?)\""],
+      datasourceTemplate: "pypi",
+      depNameTemplate: "uv"
+    },
   ],
   packageRules: [
-    {
-      matchManagers: ["pyenv"],
-      semanticCommitScope: "python",
-      commitMessageTopic: "python {{depName}}",
-      addLabels: ["renovate/python-version"]
-    },
     {
       matchManagers: ["pep621"],
       semanticCommitScope: "pypi",
       commitMessageTopic: "pypi {{depName}}",
       addLabels: ["renovate/pypi"]
-    }
+    },
+    {
+      groupName: 'Python Version group',
+      matchDepNames: ['/python/'],
+      matchDatasources: ['python-version', 'docker'],
+      group: {
+        commitMessageTopic: '{{{groupName}}} group'
+      },
+      //minimumGroupSize: 2
+    },
+    {
+      groupName: 'UV Version group',
+      matchDepNames: ['ghcr.io/astral-sh/uv', 'uv'],
+      group: {
+        commitMessageTopic: '{{{groupName}}} group'
+      },
+      //minimumGroupSize: 2
+    },
   ]
 }

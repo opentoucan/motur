@@ -1,5 +1,5 @@
-ARG PYTHON_SLIM=docker.io/python:3.13
-FROM ${PYTHON_SLIM} AS builder
+FROM docker.io/python:3.13-slim@sha256:087a9f3b880e8b2c7688debb9df2a5106e060225ebd18c264d5f1d7a73399db0 \
+ AS builder
 ARG USERNAME=app
 ARG USER_UID=2048
 ARG USER_GID=$USER_UID
@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     chromium
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9.0@sha256:8f926a80debadba6f18442030df316c0e2b28d6af62d1292fb44b1c874173dc0 \
+ /uv /uvx /bin/
 
 WORKDIR /app
 
