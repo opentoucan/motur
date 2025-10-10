@@ -41,6 +41,7 @@
               gcc
               glibc
               zlib
+              mise
               ;
           };
         };
