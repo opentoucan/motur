@@ -24,7 +24,7 @@
       group: {
         commitMessageTopic: '{{{groupName}}} group'
       },
-      //minimumGroupSize: 2
+      minimumGroupSize: 2
     },
     {
       groupName: 'UV Version group',
@@ -32,7 +32,7 @@
       group: {
         commitMessageTopic: '{{{groupName}}} group'
       },
-      //minimumGroupSize: 2
+      minimumGroupSize: 2
     },
   ]
 }
