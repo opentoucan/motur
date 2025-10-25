@@ -1,4 +1,4 @@
-FROM docker.io/python:3.13-slim@sha256:087a9f3b880e8b2c7688debb9df2a5106e060225ebd18c264d5f1d7a73399db0 \
+FROM docker.io/python:3.14-slim@sha256:4ed33101ee7ec299041cc41dd268dae17031184be94384b1ce7936dc4e5dead3 \
  AS builder
 ARG USERNAME=app
 ARG USER_UID=2048
