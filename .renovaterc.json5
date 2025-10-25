@@ -4,7 +4,7 @@
     {
       customType: "regex",
       description: "Update UV Version in pyproject.toml",
-      fileMatch: ["(^|.*/)pyproject.toml$"],
+      managerFilePatterns: ["(^|.*/)pyproject.toml$"],
       matchStrings: ["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\s+?([^\"]*)\"[>|=]+(?<currentValue>[\\d\\.]+?)\""],
       datasourceTemplate: "pypi",
       depNameTemplate: "uv"
