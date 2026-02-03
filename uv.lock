@@ -491,7 +491,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = "==0.128.0" },
     { name = "pydantic", specifier = "==2.12.4" },
     { name = "pydantic-settings", specifier = "==2.12.0" },
-    { name = "pydoll-python", specifier = "==2.12.0" },
+    { name = "pydoll-python", specifier = "==2.15.1" },
     { name = "validators", specifier = ">=0.35.0" },
 ]
 
@@ -783,7 +783,7 @@ wheels = [
 
 [[package]]
 name = "pydoll-python"
-version = "2.12.0"
+version = "2.15.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -791,9 +791,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/5b/1ee0c724abbda86259ed8c43dccf4ef0d8349de55bf490d3b1e40894d4ce/pydoll_python-2.12.0.tar.gz", hash = "sha256:e43f1dbf1aaf2b8ce79e3646e224cb48ad136231f36a90213283e5cc4ac04fa4", size = 185979, upload-time = "2025-11-04T03:20:08.626Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e6/fb/805d9ec1219fc54ea8838cb7e1c199cb38d6a3ce8751f0fc60471ffb23e3/pydoll_python-2.15.1.tar.gz", hash = "sha256:1f9df00b4c01260ee7d6935bf03f9ebfdeefa036af0a582c97959060045b94c0", size = 193844, upload-time = "2026-01-04T02:43:38.936Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/52/b3c3f17f8e20433a67b009f754471fbf915c20010acca2172ae902810562/pydoll_python-2.12.0-py3-none-any.whl", hash = "sha256:76e589f9fb8733647fc853470034f7d9a0e56a71a08f55c23cfd4f8707e70f1e", size = 213000, upload-time = "2025-11-04T03:20:06.932Z" },
+    { url = "https://files.pythonhosted.org/packages/75/4a/c8dda837bb7742359f86454d4d05fe8a8caefee7e526adcc0a32d3606e7f/pydoll_python-2.15.1-py3-none-any.whl", hash = "sha256:71226246fb2bd4c1979fb0d318ba25b925ac8584f0ef2592ba0f027fe885c3e0", size = 223426, upload-time = "2026-01-04T02:43:37.743Z" },
 ]
 
 [[package]]
